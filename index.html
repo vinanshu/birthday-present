@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Responsive Animated Gift Box</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Great+Vibes&display=swap" rel="stylesheet">
+    <style>
+        /* Custom styles for the gift box */
+        body {
+            font-family: 'Inter', sans-serif;
+            /* Purple gradient background */
+            background: linear-gradient(135deg, #a77eff 0%, #7d4dff 50%, #5d2ed1 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            color: #333;
+            position: relative;
+        }
+
+        /* Confetti effect on open */
+        .confetti {
+            position: absolute;
+            width: 12px; /* Slightly larger confetti */
+            height: 12px;
+            background-color: var(--confetti-color);
+            border-radius: 50%;
+            opacity: 0;
+            animation: confetti-fall 2.5s ease-out forwards; /* Adjusted animation speed */
+            pointer-events: none;
+        }
+
+        @keyframes confetti-fall {
+            0% {
+                transform: translate(0, 0) rotate(0deg) scale(1); /* Start with full size */
+                opacity: 1;
+            }
+            100% {
+                transform: translate(var(--x), var(--y)) rotate(var(--rot)) scale(0.5); /* Shrink as it falls */
+                opacity: 0;
+            }
+        }
+
+        /* Container for the 3D effect */
+        .gift-box-container {
+            perspective: 1200px;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 90vw;
+            max-width: 400px;
+            height: 90vw;
+            max-height: 400px;
+            border-radius: 20px;
+            background-color: rgba(255, 255, 255, 0.3); /* Slightly more opaque container */
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4); /* Enhanced shadow */
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .gift-box {
+            position: relative;
+            width: 100%;
+            max-width: 250px;
+            height: 180%;
+            max-height: 500px;
+            transform-style: preserve-3d;
+            transition: transform 0.8s ease-in-out;
+            border-radius: 12px;
+        }
+
+        /* Small rotation for the entire gift box when open */
+        .gift-box.open {
+            transform: rotateY(5deg) rotateX(-2deg);
+        }
+
+        /* Box Base */
+        .box-base {
+            position: absolute;
+            margin-top:-50px;
+            width: 100%;
+            height: 180%;
+            /* Richer purple box base color */
+            background: linear-gradient(to bottom right, #5A2B8F, #7E4AA1);
+            border: 2px solid #451F6F; /* Darker border for contrast */
+            border-radius: 12px;
+            transform-origin: center bottom;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Animated Stripes Overlay */
+        .striped-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                45deg,
+                rgba(255, 255, 255, 0.1) 0%,
+                rgba(255, 255, 255, 0.1) 10%,
+                transparent 10%,
+                transparent 20%
+            );
+            background-size: 40px 40px;
+            animation: stripes-move 5s linear infinite;
+            opacity: 0.8;
+            mix-blend-mode: overlay;
+        }
+
+        @keyframes stripes-move {
+            0% { background-position: 0 0; }
+            100% { background-position: 40px 40px; }
+        }
+
+        /* Box Lid */
+        .box-lid {
+            position: absolute;
+            width: calc(100% + 20px);
+            height: 50px;
+            /* Brighter purple lid */
+            background: linear-gradient(to bottom right, #8C5B9F, #A673C2);
+            border: 2px solid #6F4A94;
+            top: -50px;
+            left: -10px;
+            transition: transform 0.9s cubic-bezier(0.68, -0.55, 0.27, 1.55), box-shadow 0.3s ease; /* Added box-shadow transition */
+            z-index: 10;
+            cursor: pointer;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5), inset 0 3px 5px rgba(255,255,255,0.3), inset 0 -3px 5px rgba(0,0,0,0.3);
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: -330px;
+            position: relative;
+        }
+
+        /* New animated glow effect for the lid */
+        .box-lid:hover {
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6), 0 0 20px #e0b0ff; /* Glow effect on hover, matching purple theme */
+        }
+
+        /* Click Indicator on Lid */
+        .box-lid::after {
+            content: 'Click Me!';
+            position: absolute;
+            bottom: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #F0D55F; /* Goldenrod color */
+            font-size: 0.9rem;
+            font-weight: 600;
+            opacity: 1;
+            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+            animation: bounce-arrow 1.5s infinite;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+            pointer-events: none;
+        }
+
+        .box-lid.open::after {
+            opacity: 0;
+            transform: translateX(-50%) translateY(-10px);
+        }
+
+        @keyframes bounce-arrow {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateX(-50%) translateY(0);
+            }
+            40% {
+                transform: translateX(-50%) translateY(-5px);
+            }
+            60% {
+                transform: translateX(-50%) translateY(-3px);
+            }
+        }
+
+        /* Ribbon on the lid */
+        .ribbon {
+            position: absolute;
+            width: 25px;
+            height: 100%;
+            background-color: #F0D55F; /* Goldenrod color */
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.4);
+            border-radius: 3px;
+            transition: transform 0.3s ease-out;
+        }
+
+        .ribbon::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 15px;
+            background-color: #F0D55F;
+            top: 50%;
+            left: 0;
+            transform: translateY(-50%);
+            box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.4);
+            border-radius: 3px;
+        }
+
+        /* Ribbon animation on lid open */
+        .box-lid.open .ribbon {
+            transform: translateX(-50%) scale(0.9);
+        }
+
+        /* Opened lid state: lid moves upwards with a slight wobble */
+        .box-lid.open {
+            transform: translateY(-200px) rotateZ(15deg);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4); /* Reduced shadow when open */
+        }
+
+        /* Content inside the box */
+        .box-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #f7f7f7;
+            font-size: 1.6rem;
+            font-weight: 600;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 0.6s ease-in-out;
+            z-index: 5;
+            padding: 10px 20px;
+            background-color: rgba(0, 0, 0, 0.8); /* More opaque content background */
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4);
+            width: 90%;
+            max-height: 150%;
+            overflow-y: auto;
+            box-sizing: border-box;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5); /* Text shadow for depth */
+        }
+
+        .box-content p {
+            margin: 10px 0;
+            margin-top: 10px;
+        }
+
+        /* Stylish signature for the birthday message */
+        .signature {
+            font-family: 'Great Vibes', cursive;
+            font-size: 1.8rem;
+            margin-top: 20px;
+            color: #F0D55F; /* Goldenrod color for signature */
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+        }
+
+        .box-content.visible {
+            opacity: 1;
+        }
+
+        /* Styles for external images */
+        .external-image {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            z-index: 0;
+            transition: transform 0.5s ease-in-out, opacity 0.5s ease-in-out;
+            opacity: 0;
+            border: 3px solid rgba(255, 255, 255, 0.8);
+            filter: grayscale(20%) brightness(1.1);
+        }
+
+        .external-image.visible {
+            opacity: 1;
+        }
+
+        /* Specific positions for each external image */
+        #extImage1 {
+            top: 10%;
+            left: 10%;
+            transform: rotate(-15deg);
+            --initial-rotation: -15deg;
+            animation: float 4s ease-in-out infinite;
+            animation-delay: 0.2s;
+        }
+
+        #extImage2 {
+            bottom: 15%;
+            right: 10%;
+            transform: rotate(10deg);
+            --initial-rotation: 10deg;
+            animation: float 4s ease-in-out infinite;
+            animation-delay: 0.8s;
+        }
+
+        #extImage3 {
+            top: 20%;
+            right: 10%;
+            transform: rotate(5deg);
+            --initial-rotation: 5deg;
+            animation: float 4s ease-in-out infinite;
+            animation-delay: 1.4s;
+        }
+        #extImage4 {
+            bottom: 5%;
+            left: 10%;
+            transform: rotate(5deg);
+            --initial-rotation: 5deg;
+            animation: float 4s ease-in-out infinite;
+            animation-delay: 1.4s;
+        }
+
+        /* Floating animation for all floating elements */
+        @keyframes float {
+            0% { transform: translateY(0) rotate(var(--initial-rotation, 0deg)); }
+            50% { transform: translateY(-15px) rotate(var(--initial-rotation, 0deg)); }
+            100% { transform: translateY(0) rotate(var(--initial-rotation, 0deg)); }
+        }
+
+        /* Responsive adjustments for smaller screens */
+        @media (max-width: 768px) {
+            .gift-box-container {
+                width: 95vw;
+                height: 95vw;
+                padding: 15px;
+            }
+
+            .gift-box {
+                width: 80%;
+                max-width: 180px;
+                height: 80%;
+                max-height: 180px;
+            }
+
+            .box-lid {
+                width: calc(100% + 16px);
+                height: 45px;
+                top: -22.5px;
+                left: -8px;
+            }
+
+            .box-lid.open {
+                transform: translateY(-150px) rotateZ(12deg);
+            }
+
+            .ribbon {
+                width: 20px;
+            }
+            .ribbon::before {
+                height: 12px;
+            }
+
+            .box-content {
+                font-size: 1.1rem;
+                padding: 8px 10px;
+            }
+            .box-content p {
+                margin: 8px 0;
+            }
+            .signature {
+                font-size: 1.5rem;
+            }
+
+
+            .external-image {
+                width: 70px;
+                height: 70px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .gift-box-container {
+                height: 90vh;
+            }
+            .box-content {
+                font-size: 0.9rem;
+                padding: 5px 8px;
+            }
+            .box-content p {
+                margin: 5px 0;
+            }
+            .signature {
+                font-size: 1.2rem;
+            }
+
+            .external-image {
+                width: 100px;
+                height: 100px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="gift-box-container">
+        <div class="gift-box" id="giftBox">
+            <div class="box-base">
+                <div class="striped-overlay"></div>
+            </div>
+            <div class="box-lid" id="boxLid">
+                <div class="ribbon"></div>
+            </div>
+            <div class="box-content" id="boxContent">
+                <p>Happy Birthday, Ivy Grace Tomindog! 💖</p>
+                <p>On this special day, I just want to remind you how deeply loved you are not just today, but every single moment. Your smile lights up my world, your presence brings peace to my heart, and your love makes everything feel right.</p>
+                <p>As we celebrate your birthday, I’m thankful not only for your life, but for the beautiful journey we share as a couple. Here’s to more adventures together, more memories to create, and a love that keeps growing stronger with each passing year. </p>
+                <p>You deserve all the happiness in the world, and I promise to be by your side to give it to you today and always. 💑</p>
+                <p>Happy Birthday, my Langga! 🎂💐</p>
+                <p class="signature">With all my love,</p>
+            </div>
+        </div>
+    </div>
+
+    <img src="pic1.jpg" alt="Decorative Image 1" class="external-image" id="extImage1">
+    <img src="pic2.jpg" alt="Decorative Image 2" class="external-image" id="extImage2">
+    <img src="pic3.jpg" alt="Decorative Image 3" class="external-image" id="extImage3">
+    <img src="pic4.jpg" alt="Decorative Image 4" class="external-image" id="extImage4">
+
+
+    <audio loop autoplay>
+        <source src="birthday.mp3" type="audio/mpeg">
+    </audio>
+
+    <script>
+        const boxLid = document.getElementById('boxLid');
+        const boxContent = document.getElementById('boxContent');
+        const giftBox = document.getElementById('giftBox');
+        const externalImages = document.querySelectorAll('.external-image');
+
+        boxLid.addEventListener('click', () => {
+            const isOpening = !boxLid.classList.contains('open');
+
+            boxLid.classList.toggle('open');
+            giftBox.classList.toggle('open');
+
+            externalImages.forEach(img => {
+                img.classList.toggle('visible', isOpening);
+            });
+
+            setTimeout(() => {
+                boxContent.classList.toggle('visible');
+                if (isOpening) {
+                    // Confetti colors adjusted for purple theme, including some goldenrod for contrast
+                    createConfettiBurst(50);
+                }
+            }, 400);
+        });
+
+        function createConfettiBurst(count) {
+            const colors = ['#e0b0ff', '#c29aff', '#a673c2', '#f0d55f', '#ffcc80'];
+            for (let i = 0; i < count; i++) {
+                const confetti = document.createElement('div');
+                confetti.classList.add('confetti');
+                confetti.style.setProperty('--confetti-color', colors[Math.floor(Math.random() * colors.length)]);
+
+                const lidRect = boxLid.getBoundingClientRect();
+                const startX = lidRect.left + lidRect.width / 2 + (Math.random() - 0.5) * lidRect.width;
+                const startY = lidRect.top + lidRect.height / 2 + (Math.random() - 0.5) * lidRect.height;
+                confetti.style.left = `${startX}px`;
+                confetti.style.top = `${startY}px`;
+
+                confetti.style.setProperty('--x', `${(Math.random() - 0.5) * 500}px`);
+                confetti.style.setProperty('--y', `${window.innerHeight + 100}px`);
+                confetti.style.setProperty('--rot', `${Math.random() * 720}deg`);
+
+                document.body.appendChild(confetti);
+
+                confetti.addEventListener('animationend', () => {
+                    confetti.remove();
+                });
+            }
+        }
+    </script>
+</body>
+</html>
