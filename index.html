@@ -705,8 +705,9 @@
     <div class="balloon" id="balloon11"></div>
     <div class="balloon" id="balloon12"></div>
 
-    <audio loop autoplay>
+    <audio id="birthdayAudio" loop>
         <source src="birthday.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
     </audio>
 
     <script>
@@ -714,12 +715,13 @@
         const boxContent = document.getElementById('boxContent');
         const giftBox = document.getElementById('giftBox');
         const externalImages = document.querySelectorAll('.external-image');
-        const balloons = document.querySelectorAll('.balloon'); // Selects ALL elements with class 'balloon'
+        const balloons = document.querySelectorAll('.balloon');
+        const birthdayAudio = document.getElementById('birthdayAudio'); // Get the audio element
 
         // Initially hide the content and external images/balloons
         boxContent.classList.remove('visible'); // Ensure content is hidden on load
         externalImages.forEach(img => img.classList.remove('visible'));
-        balloons.forEach(balloon => balloon.classList.remove('visible')); // Hides all balloons
+        balloons.forEach(balloon => balloon.classList.remove('visible'));
 
         boxLid.addEventListener('click', () => {
             const isOpening = !boxLid.classList.contains('open');
@@ -727,12 +729,19 @@
             boxLid.classList.toggle('open');
             giftBox.classList.toggle('open');
 
+            // Play/Pause audio based on whether the box is opening or closing
+            if (isOpening) {
+                birthdayAudio.play().catch(e => console.error("Audio playback failed:", e));
+            } else {
+                birthdayAudio.pause();
+            }
+
             // Toggle visibility for external images
             externalImages.forEach(img => {
                 img.classList.toggle('visible', isOpening);
             });
 
-            // Toggle visibility for balloons (this now applies to all new balloons too)
+            // Toggle visibility for balloons
             balloons.forEach(balloon => {
                 balloon.classList.toggle('visible', isOpening);
             });
@@ -746,9 +755,8 @@
                 }
             }, 400); // This delay should match the lid's opening animation
 
-            // This ensures balloons appear/disappear in sync with the lid opening
+            // If closing, ensure balloons hide properly immediately to avoid being visible while lid closes
             if (!isOpening) {
-                // If closing, ensure balloons hide properly
                 balloons.forEach(balloon => balloon.classList.remove('visible'));
             }
         });
